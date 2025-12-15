@@ -1,5 +1,4 @@
 # Generated files
-*.pb.go
 *.pb.go.bak
 
 # IDE
