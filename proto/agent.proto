@@ -1,0 +1,129 @@
+syntax = "proto3";
+
+package tnc.agent;
+
+option go_package = "esba-tnc-api/proto";
+
+// TncAgent 서비스 정의
+service TncAgent {
+  // 조회 기능 (Unary RPC)
+  rpc CollectInterfaces(CollectRequest) returns (InterfaceList);
+  rpc CollectNeighbors(CollectRequest) returns (NeighborList);
+  rpc CollectFIB(CollectRequest) returns (FIBList);
+  rpc CollectACL(CollectRequest) returns (ACLList);
+  rpc CollectMemif(CollectRequest) returns (MemifList);
+  rpc CollectSRv6(CollectRequest) returns (SRv6List);
+  
+  // 헬스 체크
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  
+  // 이벤트 스트리밍 (Server Streaming)
+  rpc WatchEvents(WatchRequest) returns (stream Event);
+}
+
+// 요청 메시지
+message CollectRequest {
+  string resource = 1;
+}
+
+message WatchRequest {
+  repeated string event_types = 1; // ["interface", "neighbor"]
+}
+
+message HealthCheckRequest {
+  // 빈 메시지
+}
+
+// 응답 메시지
+message HealthCheckResponse {
+  string status = 1;
+  string service = 2;
+  string timestamp = 3;
+}
+
+// 이벤트 메시지
+message Event {
+  string type = 1;  // "interface", "neighbor"
+  int64 timestamp = 2;
+  bytes data = 3;   // JSON 형식의 이벤트 데이터
+}
+
+// Interface 관련 메시지
+message InterfaceList {
+  repeated Interface interfaces = 1;
+}
+
+message Interface {
+  uint32 sw_if_index = 1;
+  string interface_name = 2;
+  bool admin_up = 3;
+  bool link_up = 4;
+  uint32 l3_up = 5;
+  uint32 flags = 6;
+  string tag = 7;
+}
+
+// Neighbor 관련 메시지
+message NeighborList {
+  repeated Neighbor neighbors = 1;
+}
+
+message Neighbor {
+  string ip_address = 1;
+  string mac_address = 2;
+  uint32 sw_if_index = 3;
+  bool is_static = 4;
+  bool is_ipv6 = 5;
+}
+
+// FIB 관련 메시지
+message FIBList {
+  repeated FIBEntry entries = 1;
+}
+
+message FIBEntry {
+  string prefix = 1;
+  uint32 sw_if_index = 2;
+  string next_hop = 3;
+  uint32 weight = 4;
+  uint32 preference = 5;
+}
+
+// ACL 관련 메시지
+message ACLList {
+  repeated ACLEntry entries = 1;
+}
+
+message ACLEntry {
+  uint32 acl_index = 1;
+  string tag = 2;
+  uint32 count = 3;
+}
+
+// Memif 관련 메시지
+message MemifList {
+  repeated MemifEntry entries = 1;
+}
+
+message MemifEntry {
+  uint32 sw_if_index = 1;
+  string socket_filename = 2;
+  uint32 id = 3;
+  bool role = 4;
+  uint32 mode = 5;
+  uint32 ring_size = 6;
+  uint32 buffer_size = 7;
+}
+
+// SRv6 관련 메시지
+message SRv6List {
+  repeated SRv6Entry entries = 1;
+}
+
+message SRv6Entry {
+  string sid = 1;
+  uint32 behavior = 2;
+  uint32 sw_if_index = 3;
+  uint32 fib_table = 4;
+}
+
