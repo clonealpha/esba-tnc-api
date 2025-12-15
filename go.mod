@@ -1,4 +1,4 @@
-module esba-tnc-api
+module github.com/clonealpha/esba-tnc-api
 
 go 1.24.0
 
