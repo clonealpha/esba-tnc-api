@@ -9,6 +9,7 @@
 - [사용 방법](#사용-방법)
 - [API 정의](#api-정의)
 - [업데이트 프로세스](#업데이트-프로세스)
+- [새로운 리소스 추가 절차](#새로운-리소스-추가-절차)
 - [의존성](#의존성)
 
 ## 목적
@@ -236,6 +237,143 @@ go run . --proto --converters
 
 - `proto/agent_generated.proto`: 생성된 proto 정의
 - `../esba-tnc-agent/agent/grpc/handler/converters_gen.go`: 생성된 변환 함수
+
+## 새로운 리소스 추가 절차
+
+새로운 VPP 리소스를 `esba-tnc-api`에 추가할 때는 다음 단계를 따라야 합니다:
+
+### 1. proto-generator 설정 파일 업데이트
+
+`tools/proto-generator/config/proto.yaml`에 새로운 리소스를 추가합니다.
+
+**예시**: `tools/proto-generator/config/proto.yaml`
+
+```yaml
+resources:
+  # ... 기존 리소스들 ...
+  
+  # 새로운 리소스 추가
+  - name: new_resource
+    binapi_message: NewResourceDetails
+    proto_message: NewResource
+    list_message: NewResourceList
+    fields:
+      - binapi_field: ID
+        proto_field: id
+        converter: "uint32({{field}})"
+      - binapi_field: Name
+        proto_field: name
+        converter: "string(bytes.Trim({{field}}, \"\\x00\"))"
+      # ... 추가 필드들 ...
+```
+
+### 2. Proto 정의 추가 (수동 또는 자동 생성)
+
+#### 방법 A: proto-generator 사용 (권장)
+
+```bash
+cd tools/proto-generator
+go run . --binapi-dir=../govpp/binapi --output=../proto --config=config/proto.yaml --proto
+```
+
+이 명령은 `proto/agent_generated.proto`에 새로운 리소스 정의를 생성합니다.
+
+#### 방법 B: 수동 추가
+
+`proto/agent.proto`에 직접 추가:
+
+```protobuf
+// RPC 메서드 추가
+rpc CollectNewResource(CollectRequest) returns (NewResourceList);
+
+// 메시지 타입 추가
+message NewResourceList {
+  repeated NewResourceEntry resources = 1;
+}
+
+message NewResourceEntry {
+  uint32 id = 1;
+  string name = 2;
+  // ... 추가 필드들 ...
+}
+```
+
+### 3. Proto 파일 컴파일
+
+```bash
+./scripts/generate-proto.sh
+```
+
+또는 수동으로:
+
+```bash
+protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    proto/agent.proto
+```
+
+이 명령은 다음 파일들을 생성합니다:
+- `proto/agent.pb.go`: 메시지 타입 코드
+- `proto/agent_grpc.pb.go`: 서비스 코드
+
+### 4. 버전 업데이트 및 태그 생성
+
+변경사항을 커밋하고 새 버전 태그를 생성합니다:
+
+```bash
+# 변경사항 커밋
+git add .
+git commit -m "feat: Add NewResource collection support"
+
+# 새 버전 태그 생성 (예: v0.1.5)
+git tag -a v0.1.5 -m "feat: Add NewResource collection support"
+
+# GitHub에 push
+git push origin main
+git push origin v0.1.5
+```
+
+### 5. 의존성 업데이트
+
+다른 프로젝트(`esba-tnc-agent`, `esba-tnc-proxy`)에서 새 버전을 사용하도록 업데이트:
+
+```bash
+# esba-tnc-agent/go.mod
+require github.com/clonealpha/esba-tnc-api v0.1.5
+
+# esba-tnc-proxy/go.mod
+require github.com/clonealpha/esba-tnc-api v0.1.5
+```
+
+### 6. 변환 함수 생성 (선택사항)
+
+proto-generator를 사용하여 변환 함수를 자동 생성할 수 있습니다:
+
+```bash
+cd tools/proto-generator
+go run . --binapi-dir=../govpp/binapi --output=../esba-tnc-agent/agent/grpc/handler --config=config/proto.yaml --converters
+```
+
+이 명령은 `esba-tnc-agent/agent/grpc/handler/converters_gen.go`에 변환 함수를 생성합니다.
+
+### 체크리스트
+
+새 리소스 추가 시 다음 항목을 확인하세요:
+
+- [ ] `tools/proto-generator/config/proto.yaml`에 리소스 설정 추가
+- [ ] `proto/agent.proto`에 RPC 메서드 및 메시지 타입 추가 (수동 또는 자동)
+- [ ] Proto 파일 컴파일 완료 (`agent.pb.go`, `agent_grpc.pb.go` 생성 확인)
+- [ ] 빌드 테스트 (`go build ./...`)
+- [ ] 버전 태그 생성 및 GitHub push
+- [ ] `esba-tnc-agent`에서 새 버전 사용하도록 업데이트
+- [ ] `esba-tnc-proxy`에서 새 버전 사용하도록 업데이트
+
+### 주의사항
+
+1. **버전 관리**: 새로운 리소스를 추가할 때마다 버전을 올려야 합니다 (예: v0.1.4 → v0.1.5)
+2. **하위 호환성**: 기존 RPC 메서드나 메시지 타입을 변경할 때는 주의해야 합니다
+3. **proto-generator 사용**: 가능하면 proto-generator를 사용하여 일관성을 유지하세요
+4. **문서 업데이트**: README의 RPC 메서드 목록과 메시지 타입 목록을 업데이트하세요
 
 ## 의존성
 
