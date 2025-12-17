@@ -1,0 +1,26 @@
+set -e
+
+# 스크립트가 있는 디렉토리 찾기 (scripts/ 디렉토리)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# 프로젝트 루트 찾기 (scripts/의 상위 디렉토리)
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+
+# VPP API 디렉토리 (기본값: /usr/share/vpp/api)
+# => vpp에서 make go-api-files 실행한 후 esba-upf/vpp/vppbinapi가 생성되는데 이걸 사용해야 되고
+#    esba-upf/vpp/build-root/install-vpp-native/vpp/share/vpp/api 로 재빌드해서 사용해도 됨
+VPP_API_DIR="${1:-/usr/share/vpp/api}"
+
+if [ ! -d "$VPP_API_DIR" ]; then
+    echo "오류: VPP API 디렉토리를 찾을 수 없습니다: $VPP_API_DIR"
+    echo "사용법: $0 [VPP_API_DIR]"
+    exit 1
+fi
+
+cd tools/proto-generator
+go run . \
+    --binapi-dir="$VPP_API_DIR" \
+    --output="$PROJECT_ROOT/proto" \
+    --config="config/proto.yaml" \
+    --proto
