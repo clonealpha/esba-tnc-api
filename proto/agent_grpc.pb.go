@@ -19,20 +19,25 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TncAgent_CollectInterfaces_FullMethodName    = "/tnc.agent.TncAgent/CollectInterfaces"
-	TncAgent_CollectNeighbors_FullMethodName     = "/tnc.agent.TncAgent/CollectNeighbors"
-	TncAgent_CollectFIB_FullMethodName           = "/tnc.agent.TncAgent/CollectFIB"
-	TncAgent_CollectACL_FullMethodName           = "/tnc.agent.TncAgent/CollectACL"
-	TncAgent_CollectMemif_FullMethodName         = "/tnc.agent.TncAgent/CollectMemif"
-	TncAgent_CollectSRv6_FullMethodName          = "/tnc.agent.TncAgent/CollectSRv6"
-	TncAgent_CollectVersion_FullMethodName       = "/tnc.agent.TncAgent/CollectVersion"
-	TncAgent_CollectHardware_FullMethodName      = "/tnc.agent.TncAgent/CollectHardware"
-	TncAgent_CollectIPAddresses_FullMethodName   = "/tnc.agent.TncAgent/CollectIPAddresses"
-	TncAgent_CollectL2FIB_FullMethodName         = "/tnc.agent.TncAgent/CollectL2FIB"
-	TncAgent_CollectBridgeDomains_FullMethodName = "/tnc.agent.TncAgent/CollectBridgeDomains"
-	TncAgent_CollectVXLAN_FullMethodName         = "/tnc.agent.TncAgent/CollectVXLAN"
-	TncAgent_HealthCheck_FullMethodName          = "/tnc.agent.TncAgent/HealthCheck"
-	TncAgent_WatchEvents_FullMethodName          = "/tnc.agent.TncAgent/WatchEvents"
+	TncAgent_CollectInterfaces_FullMethodName       = "/tnc.agent.TncAgent/CollectInterfaces"
+	TncAgent_CollectNeighbors_FullMethodName        = "/tnc.agent.TncAgent/CollectNeighbors"
+	TncAgent_CollectFIB_FullMethodName              = "/tnc.agent.TncAgent/CollectFIB"
+	TncAgent_CollectACL_FullMethodName              = "/tnc.agent.TncAgent/CollectACL"
+	TncAgent_CollectMemif_FullMethodName            = "/tnc.agent.TncAgent/CollectMemif"
+	TncAgent_CollectSRv6_FullMethodName             = "/tnc.agent.TncAgent/CollectSRv6"
+	TncAgent_CollectVersion_FullMethodName          = "/tnc.agent.TncAgent/CollectVersion"
+	TncAgent_CollectHardware_FullMethodName         = "/tnc.agent.TncAgent/CollectHardware"
+	TncAgent_CollectIPAddresses_FullMethodName      = "/tnc.agent.TncAgent/CollectIPAddresses"
+	TncAgent_CollectL2FIB_FullMethodName            = "/tnc.agent.TncAgent/CollectL2FIB"
+	TncAgent_CollectBridgeDomains_FullMethodName    = "/tnc.agent.TncAgent/CollectBridgeDomains"
+	TncAgent_CollectVXLAN_FullMethodName            = "/tnc.agent.TncAgent/CollectVXLAN"
+	TncAgent_CollectUPFApplications_FullMethodName  = "/tnc.agent.TncAgent/CollectUPFApplications"
+	TncAgent_CollectUPFNWI_FullMethodName           = "/tnc.agent.TncAgent/CollectUPFNWI"
+	TncAgent_CollectUPFPFCPEndpoints_FullMethodName = "/tnc.agent.TncAgent/CollectUPFPFCPEndpoints"
+	TncAgent_CollectUPFPolicies_FullMethodName      = "/tnc.agent.TncAgent/CollectUPFPolicies"
+	TncAgent_CollectUPFNATPools_FullMethodName      = "/tnc.agent.TncAgent/CollectUPFNATPools"
+	TncAgent_HealthCheck_FullMethodName             = "/tnc.agent.TncAgent/HealthCheck"
+	TncAgent_WatchEvents_FullMethodName             = "/tnc.agent.TncAgent/WatchEvents"
 )
 
 // TncAgentClient is the client API for TncAgent service.
@@ -54,6 +59,11 @@ type TncAgentClient interface {
 	CollectL2FIB(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*L2FIBList, error)
 	CollectBridgeDomains(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*BridgeDomainList, error)
 	CollectVXLAN(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*VXLANList, error)
+	CollectUPFApplications(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFApplicationList, error)
+	CollectUPFNWI(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFNWIList, error)
+	CollectUPFPFCPEndpoints(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFPFCPEndpointList, error)
+	CollectUPFPolicies(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFPolicyList, error)
+	CollectUPFNATPools(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFNATPoolList, error)
 	// 헬스 체크
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 	// 이벤트 스트리밍 (Server Streaming)
@@ -188,6 +198,56 @@ func (c *tncAgentClient) CollectVXLAN(ctx context.Context, in *CollectRequest, o
 	return out, nil
 }
 
+func (c *tncAgentClient) CollectUPFApplications(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFApplicationList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UPFApplicationList)
+	err := c.cc.Invoke(ctx, TncAgent_CollectUPFApplications_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tncAgentClient) CollectUPFNWI(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFNWIList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UPFNWIList)
+	err := c.cc.Invoke(ctx, TncAgent_CollectUPFNWI_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tncAgentClient) CollectUPFPFCPEndpoints(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFPFCPEndpointList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UPFPFCPEndpointList)
+	err := c.cc.Invoke(ctx, TncAgent_CollectUPFPFCPEndpoints_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tncAgentClient) CollectUPFPolicies(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFPolicyList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UPFPolicyList)
+	err := c.cc.Invoke(ctx, TncAgent_CollectUPFPolicies_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *tncAgentClient) CollectUPFNATPools(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFNATPoolList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UPFNATPoolList)
+	err := c.cc.Invoke(ctx, TncAgent_CollectUPFNATPools_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tncAgentClient) HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HealthCheckResponse)
@@ -236,6 +296,11 @@ type TncAgentServer interface {
 	CollectL2FIB(context.Context, *CollectRequest) (*L2FIBList, error)
 	CollectBridgeDomains(context.Context, *CollectRequest) (*BridgeDomainList, error)
 	CollectVXLAN(context.Context, *CollectRequest) (*VXLANList, error)
+	CollectUPFApplications(context.Context, *CollectRequest) (*UPFApplicationList, error)
+	CollectUPFNWI(context.Context, *CollectRequest) (*UPFNWIList, error)
+	CollectUPFPFCPEndpoints(context.Context, *CollectRequest) (*UPFPFCPEndpointList, error)
+	CollectUPFPolicies(context.Context, *CollectRequest) (*UPFPolicyList, error)
+	CollectUPFNATPools(context.Context, *CollectRequest) (*UPFNATPoolList, error)
 	// 헬스 체크
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	// 이벤트 스트리밍 (Server Streaming)
@@ -285,6 +350,21 @@ func (UnimplementedTncAgentServer) CollectBridgeDomains(context.Context, *Collec
 }
 func (UnimplementedTncAgentServer) CollectVXLAN(context.Context, *CollectRequest) (*VXLANList, error) {
 	return nil, status.Error(codes.Unimplemented, "method CollectVXLAN not implemented")
+}
+func (UnimplementedTncAgentServer) CollectUPFApplications(context.Context, *CollectRequest) (*UPFApplicationList, error) {
+	return nil, status.Error(codes.Unimplemented, "method CollectUPFApplications not implemented")
+}
+func (UnimplementedTncAgentServer) CollectUPFNWI(context.Context, *CollectRequest) (*UPFNWIList, error) {
+	return nil, status.Error(codes.Unimplemented, "method CollectUPFNWI not implemented")
+}
+func (UnimplementedTncAgentServer) CollectUPFPFCPEndpoints(context.Context, *CollectRequest) (*UPFPFCPEndpointList, error) {
+	return nil, status.Error(codes.Unimplemented, "method CollectUPFPFCPEndpoints not implemented")
+}
+func (UnimplementedTncAgentServer) CollectUPFPolicies(context.Context, *CollectRequest) (*UPFPolicyList, error) {
+	return nil, status.Error(codes.Unimplemented, "method CollectUPFPolicies not implemented")
+}
+func (UnimplementedTncAgentServer) CollectUPFNATPools(context.Context, *CollectRequest) (*UPFNATPoolList, error) {
+	return nil, status.Error(codes.Unimplemented, "method CollectUPFNATPools not implemented")
 }
 func (UnimplementedTncAgentServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method HealthCheck not implemented")
@@ -529,6 +609,96 @@ func _TncAgent_CollectVXLAN_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TncAgent_CollectUPFApplications_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CollectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TncAgentServer).CollectUPFApplications(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TncAgent_CollectUPFApplications_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TncAgentServer).CollectUPFApplications(ctx, req.(*CollectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TncAgent_CollectUPFNWI_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CollectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TncAgentServer).CollectUPFNWI(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TncAgent_CollectUPFNWI_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TncAgentServer).CollectUPFNWI(ctx, req.(*CollectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TncAgent_CollectUPFPFCPEndpoints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CollectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TncAgentServer).CollectUPFPFCPEndpoints(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TncAgent_CollectUPFPFCPEndpoints_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TncAgentServer).CollectUPFPFCPEndpoints(ctx, req.(*CollectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TncAgent_CollectUPFPolicies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CollectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TncAgentServer).CollectUPFPolicies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TncAgent_CollectUPFPolicies_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TncAgentServer).CollectUPFPolicies(ctx, req.(*CollectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TncAgent_CollectUPFNATPools_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CollectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TncAgentServer).CollectUPFNATPools(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TncAgent_CollectUPFNATPools_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TncAgentServer).CollectUPFNATPools(ctx, req.(*CollectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TncAgent_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HealthCheckRequest)
 	if err := dec(in); err != nil {
@@ -612,6 +782,26 @@ var TncAgent_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CollectVXLAN",
 			Handler:    _TncAgent_CollectVXLAN_Handler,
+		},
+		{
+			MethodName: "CollectUPFApplications",
+			Handler:    _TncAgent_CollectUPFApplications_Handler,
+		},
+		{
+			MethodName: "CollectUPFNWI",
+			Handler:    _TncAgent_CollectUPFNWI_Handler,
+		},
+		{
+			MethodName: "CollectUPFPFCPEndpoints",
+			Handler:    _TncAgent_CollectUPFPFCPEndpoints_Handler,
+		},
+		{
+			MethodName: "CollectUPFPolicies",
+			Handler:    _TncAgent_CollectUPFPolicies_Handler,
+		},
+		{
+			MethodName: "CollectUPFNATPools",
+			Handler:    _TncAgent_CollectUPFNATPools_Handler,
 		},
 		{
 			MethodName: "HealthCheck",

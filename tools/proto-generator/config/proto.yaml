@@ -1,0 +1,178 @@
+# proto-generator 설정 파일
+# binapi 메시지를 proto 메시지로 변환하는 설정
+
+resources:
+  # Interface
+  - name: interfaces
+    binapi_message: SwInterfaceDetails
+    proto_message: Interface
+    list_message: InterfaceList
+    fields:
+      - binapi_field: SwIfIndex
+        proto_field: sw_if_index
+      - binapi_field: InterfaceName
+        proto_field: interface_name
+      - binapi_field: Flags
+        proto_field: flags
+        converter: "uint32({{field}})"  # 비트 플래그를 uint32로 변환
+      - binapi_field: Tag
+        proto_field: tag
+
+  # Neighbor
+  - name: neighbors
+    binapi_message: IPNeighborDetails
+    proto_message: Neighbor
+    list_message: NeighborList
+    fields:
+      - binapi_field: Neighbor.IPAddress
+        proto_field: ip_address
+        converter: "{{field}}.String()"
+      - binapi_field: Neighbor.MacAddress
+        proto_field: mac_address
+        converter: "{{field}}.String()"
+      - binapi_field: Neighbor.SwIfIndex
+        proto_field: sw_if_index
+        converter: "uint32({{field}})"
+      - binapi_field: Neighbor.Flags
+        proto_field: is_static
+        converter: "({{field}} & ip_neighbor.IP_API_NEIGHBOR_FLAG_STATIC) != 0"
+
+  # FIB
+  - name: fib
+    binapi_message: IPRouteV2Details
+    proto_message: FIBEntry
+    list_message: FIBList
+
+  # ACL
+  - name: acl
+    binapi_message: ACLDetails
+    proto_message: ACLEntry
+    list_message: ACLList
+
+  # Memif
+  - name: memif
+    binapi_message: MemifDetails
+    proto_message: MemifEntry
+    list_message: MemifList
+
+  # SRv6
+  - name: srv6
+    binapi_message: SrLocalsidDetails
+    proto_message: SRv6Entry
+    list_message: SRv6List
+
+  # Version
+  - name: version
+    binapi_message: ShowVersionReply
+    proto_message: VersionInfo
+    list_message: ""
+
+  # Hardware (CLI 기반, binapi 없음)
+  - name: hardware
+    binapi_message: ""
+    proto_message: HardwareInfo
+    list_message: ""
+
+  # IP Addresses
+  - name: ip_addresses
+    binapi_message: IPAddressDetails
+    proto_message: IPAddressEntry
+    list_message: IPAddressList
+
+  # L2 FIB
+  - name: l2_fib
+    binapi_message: L2FibTableDetails
+    proto_message: L2FIBEntry
+    list_message: L2FIBList
+
+  # Bridge Domains
+  - name: bridge_domains
+    binapi_message: BridgeDomainDetails
+    proto_message: BridgeDomainEntry
+    list_message: BridgeDomainList
+
+  # VXLAN
+  - name: vxlan
+    binapi_message: VxlanTunnelDetails
+    proto_message: VXLANEntry
+    list_message: VXLANList
+
+  # UPF Applications
+  - name: upf_applications
+    binapi_message: UpfApplicationsDetails
+    proto_message: UPFApplication
+    list_message: UPFApplicationList
+    fields:
+      - binapi_field: Name
+        proto_field: name
+        converter: "string(item.{{field}})"
+      - binapi_field: Flags
+        proto_field: flags
+
+  # UPF Network Instances (NWI)
+  - name: upf_nwi
+    binapi_message: UpfNwiDetails
+    proto_message: UPFNWI
+    list_message: UPFNWIList
+    fields:
+      - binapi_field: IP4TableID
+        proto_field: ip4_table_id
+      - binapi_field: IP6TableID
+        proto_field: ip6_table_id
+      - binapi_field: IpfixCollectorIP
+        proto_field: ipfix_collector_ip
+        converter: "{{field}}.String()"
+      - binapi_field: IpfixReportInterval
+        proto_field: ipfix_report_interval
+      - binapi_field: ObservationDomainID
+        proto_field: observation_domain_id
+      - binapi_field: ObservationPointID
+        proto_field: observation_point_id
+      - binapi_field: Nwi
+        proto_field: nwi
+        converter: "string(item.{{field}})"
+
+  # UPF PFCP Endpoints
+  - name: upf_pfcp_endpoints
+    binapi_message: UpfPfcpEndpointDetails
+    proto_message: UPFPFCPEndpoint
+    list_message: UPFPFCPEndpointList
+    fields:
+      - binapi_field: TableID
+        proto_field: table_id
+      - binapi_field: IP
+        proto_field: ip
+        converter: "{{field}}.String()"
+
+  # UPF Policies
+  - name: upf_policies
+    binapi_message: UpfPolicyDetails
+    proto_message: UPFPolicy
+    list_message: UPFPolicyList
+    fields:
+      - binapi_field: Identifier
+        proto_field: identifier
+      - binapi_field: Paths
+        proto_field: paths
+        # 복잡한 구조체 배열이므로 나중에 수동 처리 필요
+
+  # UPF NAT Pools
+  - name: upf_nat_pools
+    binapi_message: UpfNatPoolDetails
+    proto_message: UPFNATPool
+    list_message: UPFNATPoolList
+    fields:
+      - binapi_field: Name
+        proto_field: name
+        converter: "string(item.{{field}})"
+      - binapi_field: BlockSize
+        proto_field: block_size
+        converter: "uint32({{field}})"
+      - binapi_field: MaxUsers
+        proto_field: max_users
+      - binapi_field: CurrentUsers
+        proto_field: current_users
+      - binapi_field: Nwi
+        proto_field: nwi
+        converter: "string(item.{{field}})"
+
