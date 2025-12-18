@@ -377,33 +377,30 @@ go run . --binapi-dir=../govpp/binapi --output=../esba-tnc-agent/agent/grpc/hand
 
 ## 의존성
 
-- `go.fd.io/govpp`: GoVPP 라이브러리 (로컬 버전 사용)
+- `github.com/clonealpha/esba-tnc-api/govpp`: GoVPP 라이브러리 (서브모듈)
 - `google.golang.org/grpc`: gRPC 라이브러리
 - `google.golang.org/protobuf`: Protocol Buffers 라이브러리
 
 ### GoVPP 사용
 
-`esba-tnc-api`는 GoVPP를 로컬 버전으로 제공합니다. `go.mod`에서 `replace` 지시어를 사용하여 로컬 govpp를 사용합니다.
+`esba-tnc-api`는 GoVPP를 **서브모듈**(`govpp/`)로 제공합니다. 모듈 경로는 `github.com/clonealpha/esba-tnc-api/govpp`입니다.
 
-```go
-// esba-tnc-api/go.mod
-replace go.fd.io/govpp => ./govpp
-```
-
-다른 프로젝트에서는 `esba-tnc-api`를 통해 GoVPP에 접근할 수 있습니다:
+다른 프로젝트에서는 `esba-tnc-api/govpp`를 직접 import합니다:
 
 ```go
 // esba-tnc-agent/go.mod
-require github.com/clonealpha/esba-tnc-api v0.1.3
-replace github.com/clonealpha/esba-tnc-api => ../esba-tnc-api
+require (
+    github.com/clonealpha/esba-tnc-api v0.1.5
+    github.com/clonealpha/esba-tnc-api/govpp v0.1.5
+)
 ```
 
-코드에서는 기존과 동일하게 import할 수 있습니다:
+코드에서는 다음과 같이 import합니다:
 
 ```go
 import (
-    "go.fd.io/govpp/api"
-    "go.fd.io/govpp/binapi/interface"
+    "github.com/clonealpha/esba-tnc-api/govpp/api"
+    "github.com/clonealpha/esba-tnc-api/govpp/binapi/interface"
 )
 ```
 
