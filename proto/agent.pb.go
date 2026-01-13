@@ -68,7 +68,7 @@ func (x *CollectRequest) GetResource() string {
 
 type WatchRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	EventTypes    []string               `protobuf:"bytes,1,rep,name=event_types,json=eventTypes,proto3" json:"event_types,omitempty"` // ["interface", "neighbor"]
+	EventTypes    []string               `protobuf:"bytes,1,rep,name=event_types,json=eventTypes,proto3" json:"event_types,omitempty"` // ["interface", "neighbor", "bfd"]
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -210,7 +210,7 @@ func (x *HealthCheckResponse) GetTimestamp() string {
 // 이벤트 메시지
 type Event struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"` // "interface", "neighbor"
+	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"` // "interface", "neighbor", "bfd"
 	Timestamp     int64                  `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	Data          []byte                 `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"` // JSON 형식의 이벤트 데이터
 	unknownFields protoimpl.UnknownFields
@@ -2073,6 +2073,175 @@ func (x *UPFNATPool) GetNwi() string {
 	return ""
 }
 
+// BFD 관련 메시지
+type BFDList struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sessions      []*BFDSession          `protobuf:"bytes,1,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BFDList) Reset() {
+	*x = BFDList{}
+	mi := &file_proto_agent_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BFDList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BFDList) ProtoMessage() {}
+
+func (x *BFDList) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_agent_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BFDList.ProtoReflect.Descriptor instead.
+func (*BFDList) Descriptor() ([]byte, []int) {
+	return file_proto_agent_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *BFDList) GetSessions() []*BFDSession {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
+type BFDSession struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	SwIfIndex       uint32                 `protobuf:"varint,1,opt,name=sw_if_index,json=swIfIndex,proto3" json:"sw_if_index,omitempty"`
+	LocalAddr       string                 `protobuf:"bytes,2,opt,name=local_addr,json=localAddr,proto3" json:"local_addr,omitempty"`
+	PeerAddr        string                 `protobuf:"bytes,3,opt,name=peer_addr,json=peerAddr,proto3" json:"peer_addr,omitempty"`
+	State           string                 `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"` // "ADMIN_DOWN", "DOWN", "INIT", "UP"
+	IsAuthenticated bool                   `protobuf:"varint,5,opt,name=is_authenticated,json=isAuthenticated,proto3" json:"is_authenticated,omitempty"`
+	BfdKeyId        uint32                 `protobuf:"varint,6,opt,name=bfd_key_id,json=bfdKeyId,proto3" json:"bfd_key_id,omitempty"`
+	ConfKeyId       uint32                 `protobuf:"varint,7,opt,name=conf_key_id,json=confKeyId,proto3" json:"conf_key_id,omitempty"`
+	RequiredMinRx   uint32                 `protobuf:"varint,8,opt,name=required_min_rx,json=requiredMinRx,proto3" json:"required_min_rx,omitempty"`
+	DesiredMinTx    uint32                 `protobuf:"varint,9,opt,name=desired_min_tx,json=desiredMinTx,proto3" json:"desired_min_tx,omitempty"`
+	DetectMult      uint32                 `protobuf:"varint,10,opt,name=detect_mult,json=detectMult,proto3" json:"detect_mult,omitempty"`
+	IsIpv6          bool                   `protobuf:"varint,11,opt,name=is_ipv6,json=isIpv6,proto3" json:"is_ipv6,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *BFDSession) Reset() {
+	*x = BFDSession{}
+	mi := &file_proto_agent_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BFDSession) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BFDSession) ProtoMessage() {}
+
+func (x *BFDSession) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_agent_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BFDSession.ProtoReflect.Descriptor instead.
+func (*BFDSession) Descriptor() ([]byte, []int) {
+	return file_proto_agent_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *BFDSession) GetSwIfIndex() uint32 {
+	if x != nil {
+		return x.SwIfIndex
+	}
+	return 0
+}
+
+func (x *BFDSession) GetLocalAddr() string {
+	if x != nil {
+		return x.LocalAddr
+	}
+	return ""
+}
+
+func (x *BFDSession) GetPeerAddr() string {
+	if x != nil {
+		return x.PeerAddr
+	}
+	return ""
+}
+
+func (x *BFDSession) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *BFDSession) GetIsAuthenticated() bool {
+	if x != nil {
+		return x.IsAuthenticated
+	}
+	return false
+}
+
+func (x *BFDSession) GetBfdKeyId() uint32 {
+	if x != nil {
+		return x.BfdKeyId
+	}
+	return 0
+}
+
+func (x *BFDSession) GetConfKeyId() uint32 {
+	if x != nil {
+		return x.ConfKeyId
+	}
+	return 0
+}
+
+func (x *BFDSession) GetRequiredMinRx() uint32 {
+	if x != nil {
+		return x.RequiredMinRx
+	}
+	return 0
+}
+
+func (x *BFDSession) GetDesiredMinTx() uint32 {
+	if x != nil {
+		return x.DesiredMinTx
+	}
+	return 0
+}
+
+func (x *BFDSession) GetDetectMult() uint32 {
+	if x != nil {
+		return x.DetectMult
+	}
+	return 0
+}
+
+func (x *BFDSession) GetIsIpv6() bool {
+	if x != nil {
+		return x.IsIpv6
+	}
+	return false
+}
+
 var File_proto_agent_proto protoreflect.FileDescriptor
 
 const file_proto_agent_proto_rawDesc = "" +
@@ -2221,8 +2390,26 @@ const file_proto_agent_proto_rawDesc = "" +
 	"block_size\x18\x02 \x01(\rR\tblockSize\x12\x1b\n" +
 	"\tmax_users\x18\x03 \x01(\rR\bmaxUsers\x12#\n" +
 	"\rcurrent_users\x18\x04 \x01(\rR\fcurrentUsers\x12\x10\n" +
-	"\x03nwi\x18\x05 \x01(\tR\x03nwi2\xcd\n" +
+	"\x03nwi\x18\x05 \x01(\tR\x03nwi\"<\n" +
+	"\aBFDList\x121\n" +
+	"\bsessions\x18\x01 \x03(\v2\x15.tnc.agent.BFDSessionR\bsessions\"\xef\x02\n" +
 	"\n" +
+	"BFDSession\x12\x1e\n" +
+	"\vsw_if_index\x18\x01 \x01(\rR\tswIfIndex\x12\x1d\n" +
+	"\n" +
+	"local_addr\x18\x02 \x01(\tR\tlocalAddr\x12\x1b\n" +
+	"\tpeer_addr\x18\x03 \x01(\tR\bpeerAddr\x12\x14\n" +
+	"\x05state\x18\x04 \x01(\tR\x05state\x12)\n" +
+	"\x10is_authenticated\x18\x05 \x01(\bR\x0fisAuthenticated\x12\x1c\n" +
+	"\n" +
+	"bfd_key_id\x18\x06 \x01(\rR\bbfdKeyId\x12\x1e\n" +
+	"\vconf_key_id\x18\a \x01(\rR\tconfKeyId\x12&\n" +
+	"\x0frequired_min_rx\x18\b \x01(\rR\rrequiredMinRx\x12$\n" +
+	"\x0edesired_min_tx\x18\t \x01(\rR\fdesiredMinTx\x12\x1f\n" +
+	"\vdetect_mult\x18\n" +
+	" \x01(\rR\n" +
+	"detectMult\x12\x17\n" +
+	"\ais_ipv6\x18\v \x01(\bR\x06isIpv62\x8a\v\n" +
 	"\bTncAgent\x12H\n" +
 	"\x11CollectInterfaces\x12\x19.tnc.agent.CollectRequest\x1a\x18.tnc.agent.InterfaceList\x12F\n" +
 	"\x10CollectNeighbors\x12\x19.tnc.agent.CollectRequest\x1a\x17.tnc.agent.NeighborList\x12;\n" +
@@ -2242,7 +2429,9 @@ const file_proto_agent_proto_rawDesc = "" +
 	"\rCollectUPFNWI\x12\x19.tnc.agent.CollectRequest\x1a\x15.tnc.agent.UPFNWIList\x12T\n" +
 	"\x17CollectUPFPFCPEndpoints\x12\x19.tnc.agent.CollectRequest\x1a\x1e.tnc.agent.UPFPFCPEndpointList\x12I\n" +
 	"\x12CollectUPFPolicies\x12\x19.tnc.agent.CollectRequest\x1a\x18.tnc.agent.UPFPolicyList\x12J\n" +
-	"\x12CollectUPFNATPools\x12\x19.tnc.agent.CollectRequest\x1a\x19.tnc.agent.UPFNATPoolList\x12L\n" +
+	"\x12CollectUPFNATPools\x12\x19.tnc.agent.CollectRequest\x1a\x19.tnc.agent.UPFNATPoolList\x12;\n" +
+	"\n" +
+	"CollectBFD\x12\x19.tnc.agent.CollectRequest\x1a\x12.tnc.agent.BFDList\x12L\n" +
 	"\vHealthCheck\x12\x1d.tnc.agent.HealthCheckRequest\x1a\x1e.tnc.agent.HealthCheckResponse\x12:\n" +
 	"\vWatchEvents\x12\x17.tnc.agent.WatchRequest\x1a\x10.tnc.agent.Event0\x01B\x14Z\x12esba-tnc-api/protob\x06proto3"
 
@@ -2258,7 +2447,7 @@ func file_proto_agent_proto_rawDescGZIP() []byte {
 	return file_proto_agent_proto_rawDescData
 }
 
-var file_proto_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
+var file_proto_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
 var file_proto_agent_proto_goTypes = []any{
 	(*CollectRequest)(nil),      // 0: tnc.agent.CollectRequest
 	(*WatchRequest)(nil),        // 1: tnc.agent.WatchRequest
@@ -2297,6 +2486,8 @@ var file_proto_agent_proto_goTypes = []any{
 	(*UPFPolicy)(nil),           // 34: tnc.agent.UPFPolicy
 	(*UPFNATPoolList)(nil),      // 35: tnc.agent.UPFNATPoolList
 	(*UPFNATPool)(nil),          // 36: tnc.agent.UPFNATPool
+	(*BFDList)(nil),             // 37: tnc.agent.BFDList
+	(*BFDSession)(nil),          // 38: tnc.agent.BFDSession
 }
 var file_proto_agent_proto_depIdxs = []int32{
 	6,  // 0: tnc.agent.InterfaceList.interfaces:type_name -> tnc.agent.Interface
@@ -2314,49 +2505,52 @@ var file_proto_agent_proto_depIdxs = []int32{
 	32, // 12: tnc.agent.UPFPFCPEndpointList.endpoints:type_name -> tnc.agent.UPFPFCPEndpoint
 	34, // 13: tnc.agent.UPFPolicyList.policies:type_name -> tnc.agent.UPFPolicy
 	36, // 14: tnc.agent.UPFNATPoolList.pools:type_name -> tnc.agent.UPFNATPool
-	0,  // 15: tnc.agent.TncAgent.CollectInterfaces:input_type -> tnc.agent.CollectRequest
-	0,  // 16: tnc.agent.TncAgent.CollectNeighbors:input_type -> tnc.agent.CollectRequest
-	0,  // 17: tnc.agent.TncAgent.CollectFIB:input_type -> tnc.agent.CollectRequest
-	0,  // 18: tnc.agent.TncAgent.CollectACL:input_type -> tnc.agent.CollectRequest
-	0,  // 19: tnc.agent.TncAgent.CollectMemif:input_type -> tnc.agent.CollectRequest
-	0,  // 20: tnc.agent.TncAgent.CollectSRv6:input_type -> tnc.agent.CollectRequest
-	0,  // 21: tnc.agent.TncAgent.CollectVersion:input_type -> tnc.agent.CollectRequest
-	0,  // 22: tnc.agent.TncAgent.CollectHardware:input_type -> tnc.agent.CollectRequest
-	0,  // 23: tnc.agent.TncAgent.CollectIPAddresses:input_type -> tnc.agent.CollectRequest
-	0,  // 24: tnc.agent.TncAgent.CollectL2FIB:input_type -> tnc.agent.CollectRequest
-	0,  // 25: tnc.agent.TncAgent.CollectBridgeDomains:input_type -> tnc.agent.CollectRequest
-	0,  // 26: tnc.agent.TncAgent.CollectVXLAN:input_type -> tnc.agent.CollectRequest
-	0,  // 27: tnc.agent.TncAgent.CollectUPFApplications:input_type -> tnc.agent.CollectRequest
-	0,  // 28: tnc.agent.TncAgent.CollectUPFNWI:input_type -> tnc.agent.CollectRequest
-	0,  // 29: tnc.agent.TncAgent.CollectUPFPFCPEndpoints:input_type -> tnc.agent.CollectRequest
-	0,  // 30: tnc.agent.TncAgent.CollectUPFPolicies:input_type -> tnc.agent.CollectRequest
-	0,  // 31: tnc.agent.TncAgent.CollectUPFNATPools:input_type -> tnc.agent.CollectRequest
-	2,  // 32: tnc.agent.TncAgent.HealthCheck:input_type -> tnc.agent.HealthCheckRequest
-	1,  // 33: tnc.agent.TncAgent.WatchEvents:input_type -> tnc.agent.WatchRequest
-	5,  // 34: tnc.agent.TncAgent.CollectInterfaces:output_type -> tnc.agent.InterfaceList
-	7,  // 35: tnc.agent.TncAgent.CollectNeighbors:output_type -> tnc.agent.NeighborList
-	9,  // 36: tnc.agent.TncAgent.CollectFIB:output_type -> tnc.agent.FIBList
-	11, // 37: tnc.agent.TncAgent.CollectACL:output_type -> tnc.agent.ACLList
-	13, // 38: tnc.agent.TncAgent.CollectMemif:output_type -> tnc.agent.MemifList
-	15, // 39: tnc.agent.TncAgent.CollectSRv6:output_type -> tnc.agent.SRv6List
-	17, // 40: tnc.agent.TncAgent.CollectVersion:output_type -> tnc.agent.VersionInfo
-	18, // 41: tnc.agent.TncAgent.CollectHardware:output_type -> tnc.agent.HardwareInfo
-	19, // 42: tnc.agent.TncAgent.CollectIPAddresses:output_type -> tnc.agent.IPAddressList
-	21, // 43: tnc.agent.TncAgent.CollectL2FIB:output_type -> tnc.agent.L2FIBList
-	23, // 44: tnc.agent.TncAgent.CollectBridgeDomains:output_type -> tnc.agent.BridgeDomainList
-	25, // 45: tnc.agent.TncAgent.CollectVXLAN:output_type -> tnc.agent.VXLANList
-	27, // 46: tnc.agent.TncAgent.CollectUPFApplications:output_type -> tnc.agent.UPFApplicationList
-	29, // 47: tnc.agent.TncAgent.CollectUPFNWI:output_type -> tnc.agent.UPFNWIList
-	31, // 48: tnc.agent.TncAgent.CollectUPFPFCPEndpoints:output_type -> tnc.agent.UPFPFCPEndpointList
-	33, // 49: tnc.agent.TncAgent.CollectUPFPolicies:output_type -> tnc.agent.UPFPolicyList
-	35, // 50: tnc.agent.TncAgent.CollectUPFNATPools:output_type -> tnc.agent.UPFNATPoolList
-	3,  // 51: tnc.agent.TncAgent.HealthCheck:output_type -> tnc.agent.HealthCheckResponse
-	4,  // 52: tnc.agent.TncAgent.WatchEvents:output_type -> tnc.agent.Event
-	34, // [34:53] is the sub-list for method output_type
-	15, // [15:34] is the sub-list for method input_type
-	15, // [15:15] is the sub-list for extension type_name
-	15, // [15:15] is the sub-list for extension extendee
-	0,  // [0:15] is the sub-list for field type_name
+	38, // 15: tnc.agent.BFDList.sessions:type_name -> tnc.agent.BFDSession
+	0,  // 16: tnc.agent.TncAgent.CollectInterfaces:input_type -> tnc.agent.CollectRequest
+	0,  // 17: tnc.agent.TncAgent.CollectNeighbors:input_type -> tnc.agent.CollectRequest
+	0,  // 18: tnc.agent.TncAgent.CollectFIB:input_type -> tnc.agent.CollectRequest
+	0,  // 19: tnc.agent.TncAgent.CollectACL:input_type -> tnc.agent.CollectRequest
+	0,  // 20: tnc.agent.TncAgent.CollectMemif:input_type -> tnc.agent.CollectRequest
+	0,  // 21: tnc.agent.TncAgent.CollectSRv6:input_type -> tnc.agent.CollectRequest
+	0,  // 22: tnc.agent.TncAgent.CollectVersion:input_type -> tnc.agent.CollectRequest
+	0,  // 23: tnc.agent.TncAgent.CollectHardware:input_type -> tnc.agent.CollectRequest
+	0,  // 24: tnc.agent.TncAgent.CollectIPAddresses:input_type -> tnc.agent.CollectRequest
+	0,  // 25: tnc.agent.TncAgent.CollectL2FIB:input_type -> tnc.agent.CollectRequest
+	0,  // 26: tnc.agent.TncAgent.CollectBridgeDomains:input_type -> tnc.agent.CollectRequest
+	0,  // 27: tnc.agent.TncAgent.CollectVXLAN:input_type -> tnc.agent.CollectRequest
+	0,  // 28: tnc.agent.TncAgent.CollectUPFApplications:input_type -> tnc.agent.CollectRequest
+	0,  // 29: tnc.agent.TncAgent.CollectUPFNWI:input_type -> tnc.agent.CollectRequest
+	0,  // 30: tnc.agent.TncAgent.CollectUPFPFCPEndpoints:input_type -> tnc.agent.CollectRequest
+	0,  // 31: tnc.agent.TncAgent.CollectUPFPolicies:input_type -> tnc.agent.CollectRequest
+	0,  // 32: tnc.agent.TncAgent.CollectUPFNATPools:input_type -> tnc.agent.CollectRequest
+	0,  // 33: tnc.agent.TncAgent.CollectBFD:input_type -> tnc.agent.CollectRequest
+	2,  // 34: tnc.agent.TncAgent.HealthCheck:input_type -> tnc.agent.HealthCheckRequest
+	1,  // 35: tnc.agent.TncAgent.WatchEvents:input_type -> tnc.agent.WatchRequest
+	5,  // 36: tnc.agent.TncAgent.CollectInterfaces:output_type -> tnc.agent.InterfaceList
+	7,  // 37: tnc.agent.TncAgent.CollectNeighbors:output_type -> tnc.agent.NeighborList
+	9,  // 38: tnc.agent.TncAgent.CollectFIB:output_type -> tnc.agent.FIBList
+	11, // 39: tnc.agent.TncAgent.CollectACL:output_type -> tnc.agent.ACLList
+	13, // 40: tnc.agent.TncAgent.CollectMemif:output_type -> tnc.agent.MemifList
+	15, // 41: tnc.agent.TncAgent.CollectSRv6:output_type -> tnc.agent.SRv6List
+	17, // 42: tnc.agent.TncAgent.CollectVersion:output_type -> tnc.agent.VersionInfo
+	18, // 43: tnc.agent.TncAgent.CollectHardware:output_type -> tnc.agent.HardwareInfo
+	19, // 44: tnc.agent.TncAgent.CollectIPAddresses:output_type -> tnc.agent.IPAddressList
+	21, // 45: tnc.agent.TncAgent.CollectL2FIB:output_type -> tnc.agent.L2FIBList
+	23, // 46: tnc.agent.TncAgent.CollectBridgeDomains:output_type -> tnc.agent.BridgeDomainList
+	25, // 47: tnc.agent.TncAgent.CollectVXLAN:output_type -> tnc.agent.VXLANList
+	27, // 48: tnc.agent.TncAgent.CollectUPFApplications:output_type -> tnc.agent.UPFApplicationList
+	29, // 49: tnc.agent.TncAgent.CollectUPFNWI:output_type -> tnc.agent.UPFNWIList
+	31, // 50: tnc.agent.TncAgent.CollectUPFPFCPEndpoints:output_type -> tnc.agent.UPFPFCPEndpointList
+	33, // 51: tnc.agent.TncAgent.CollectUPFPolicies:output_type -> tnc.agent.UPFPolicyList
+	35, // 52: tnc.agent.TncAgent.CollectUPFNATPools:output_type -> tnc.agent.UPFNATPoolList
+	37, // 53: tnc.agent.TncAgent.CollectBFD:output_type -> tnc.agent.BFDList
+	3,  // 54: tnc.agent.TncAgent.HealthCheck:output_type -> tnc.agent.HealthCheckResponse
+	4,  // 55: tnc.agent.TncAgent.WatchEvents:output_type -> tnc.agent.Event
+	36, // [36:56] is the sub-list for method output_type
+	16, // [16:36] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_proto_agent_proto_init() }
@@ -2370,7 +2564,7 @@ func file_proto_agent_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_agent_proto_rawDesc), len(file_proto_agent_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   37,
+			NumMessages:   39,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

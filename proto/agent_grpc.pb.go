@@ -36,6 +36,7 @@ const (
 	TncAgent_CollectUPFPFCPEndpoints_FullMethodName = "/tnc.agent.TncAgent/CollectUPFPFCPEndpoints"
 	TncAgent_CollectUPFPolicies_FullMethodName      = "/tnc.agent.TncAgent/CollectUPFPolicies"
 	TncAgent_CollectUPFNATPools_FullMethodName      = "/tnc.agent.TncAgent/CollectUPFNATPools"
+	TncAgent_CollectBFD_FullMethodName              = "/tnc.agent.TncAgent/CollectBFD"
 	TncAgent_HealthCheck_FullMethodName             = "/tnc.agent.TncAgent/HealthCheck"
 	TncAgent_WatchEvents_FullMethodName             = "/tnc.agent.TncAgent/WatchEvents"
 )
@@ -64,6 +65,7 @@ type TncAgentClient interface {
 	CollectUPFPFCPEndpoints(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFPFCPEndpointList, error)
 	CollectUPFPolicies(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFPolicyList, error)
 	CollectUPFNATPools(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*UPFNATPoolList, error)
+	CollectBFD(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*BFDList, error)
 	// 헬스 체크
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 	// 이벤트 스트리밍 (Server Streaming)
@@ -248,6 +250,16 @@ func (c *tncAgentClient) CollectUPFNATPools(ctx context.Context, in *CollectRequ
 	return out, nil
 }
 
+func (c *tncAgentClient) CollectBFD(ctx context.Context, in *CollectRequest, opts ...grpc.CallOption) (*BFDList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BFDList)
+	err := c.cc.Invoke(ctx, TncAgent_CollectBFD_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *tncAgentClient) HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HealthCheckResponse)
@@ -301,6 +313,7 @@ type TncAgentServer interface {
 	CollectUPFPFCPEndpoints(context.Context, *CollectRequest) (*UPFPFCPEndpointList, error)
 	CollectUPFPolicies(context.Context, *CollectRequest) (*UPFPolicyList, error)
 	CollectUPFNATPools(context.Context, *CollectRequest) (*UPFNATPoolList, error)
+	CollectBFD(context.Context, *CollectRequest) (*BFDList, error)
 	// 헬스 체크
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	// 이벤트 스트리밍 (Server Streaming)
@@ -365,6 +378,9 @@ func (UnimplementedTncAgentServer) CollectUPFPolicies(context.Context, *CollectR
 }
 func (UnimplementedTncAgentServer) CollectUPFNATPools(context.Context, *CollectRequest) (*UPFNATPoolList, error) {
 	return nil, status.Error(codes.Unimplemented, "method CollectUPFNATPools not implemented")
+}
+func (UnimplementedTncAgentServer) CollectBFD(context.Context, *CollectRequest) (*BFDList, error) {
+	return nil, status.Error(codes.Unimplemented, "method CollectBFD not implemented")
 }
 func (UnimplementedTncAgentServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method HealthCheck not implemented")
@@ -699,6 +715,24 @@ func _TncAgent_CollectUPFNATPools_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TncAgent_CollectBFD_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CollectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TncAgentServer).CollectBFD(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TncAgent_CollectBFD_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TncAgentServer).CollectBFD(ctx, req.(*CollectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TncAgent_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HealthCheckRequest)
 	if err := dec(in); err != nil {
@@ -802,6 +836,10 @@ var TncAgent_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CollectUPFNATPools",
 			Handler:    _TncAgent_CollectUPFNATPools_Handler,
+		},
+		{
+			MethodName: "CollectBFD",
+			Handler:    _TncAgent_CollectBFD_Handler,
 		},
 		{
 			MethodName: "HealthCheck",

@@ -24,6 +24,7 @@ service TncAgent {
   rpc CollectUPFPFCPEndpoints(CollectRequest) returns (UPFPFCPEndpointList);
   rpc CollectUPFPolicies(CollectRequest) returns (UPFPolicyList);
   rpc CollectUPFNATPools(CollectRequest) returns (UPFNATPoolList);
+  rpc CollectBFD(CollectRequest) returns (BFDList);
   
   // 헬스 체크
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
@@ -38,7 +39,7 @@ message CollectRequest {
 }
 
 message WatchRequest {
-  repeated string event_types = 1; // ["interface", "neighbor"]
+  repeated string event_types = 1; // ["interface", "neighbor", "bfd"]
 }
 
 message HealthCheckRequest {
@@ -54,7 +55,7 @@ message HealthCheckResponse {
 
 // 이벤트 메시지
 message Event {
-  string type = 1;  // "interface", "neighbor"
+  string type = 1;  // "interface", "neighbor", "bfd"
   int64 timestamp = 2;
   bytes data = 3;   // JSON 형식의 이벤트 데이터
 }
@@ -249,3 +250,21 @@ message UPFNATPool {
   string nwi = 5;
 }
 
+// BFD 관련 메시지
+message BFDList {
+  repeated BFDSession sessions = 1;
+}
+
+message BFDSession {
+  uint32 sw_if_index = 1;
+  string local_addr = 2;
+  string peer_addr = 3;
+  string state = 4;  // "ADMIN_DOWN", "DOWN", "INIT", "UP"
+  bool is_authenticated = 5;
+  uint32 bfd_key_id = 6;
+  uint32 conf_key_id = 7;
+  uint32 required_min_rx = 8;
+  uint32 desired_min_tx = 9;
+  uint32 detect_mult = 10;
+  bool is_ipv6 = 11;
+}
