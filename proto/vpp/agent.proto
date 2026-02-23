@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package tnc.agent;
 
-option go_package = "esba-tnc-api/proto";
+option go_package = "github.com/clonealpha/esba-tnc-api/proto/vpp";
 
 // TncAgent 서비스 정의
 service TncAgent {
@@ -73,6 +73,7 @@ message Interface {
   uint32 l3_up = 5;
   uint32 flags = 6;
   string tag = 7;
+  uint32 link_speed = 8;  // 최대 대역폭 (Mbps, 0이면 미지원/미노출)
 }
 
 // Neighbor 관련 메시지

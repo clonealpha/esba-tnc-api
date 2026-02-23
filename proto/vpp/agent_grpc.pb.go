@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.0
 // - protoc             v3.21.12
-// source: proto/agent.proto
+// source: proto/vpp/agent.proto
 
-package proto
+package vpp
 
 import (
 	context "context"
@@ -853,5 +853,5 @@ var TncAgent_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "proto/agent.proto",
+	Metadata: "proto/vpp/agent.proto",
 }

@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package tnc;
+
+option go_package = "github.com/clonealpha/esba-tnc-api/proto/tnc";
+
+// ✅ UTNC가 제공하는 서비스 정의
+service TNCService {
+  // 🔹 TNC가 UTNC에게 최초 SR 토폴로지 정보를 전달 (UTNC가 tnc_id를 생성하여 응답)
+  rpc InitialSRTopology(InitialSRTopologyRequest) returns (TopologyAck);
+
+  // 🔹 SR 토폴로지 정보 업데이트
+  rpc UpdateSRTopology(UpdateSRTopologyRequest) returns (TopologyAck);
+
+  // 🔹 특정 SR 토폴로지 정보 삭제
+  rpc DeleteSRTopology(DeleteSRTopologyRequest) returns (TopologyAck);
+
+  // 🔹 UTNC가 저장한 최신 SR 토폴로지 상태 조회
+  rpc GetSRTopologyStatus(GetSRTopologyStatusRequest) returns (SRTopologyStatusResponse);
+
+  // 🔹 SR 노드 또는 링크 장애 발생 보고
+  rpc ReportSRFailure(SRFailureReport) returns (TopologyAck);
+}
+
+// ✅ 최초 SR 토폴로지 요청 (TNC → UTNC)
+message InitialSRTopologyRequest {
+  string tnc_name = 1;  // 🔹 TNC 식별자 (예: MAC 주소 "00:1A:2B:3C:4D:5E")
+  repeated SRNode nodes = 2;
+  repeated SRLink links = 3;
+}
+
+// ✅ SR 토폴로지 업데이트 요청
+message UpdateSRTopologyRequest {
+  string tnc_id = 1; // 🔹 UTNC가 발급한 ID (최초 InitialSRTopology 응답에서 받은 값)
+  repeated SRNode nodes = 2;
+  repeated SRLink links = 3;
+}
+
+// ✅ SR 토폴로지 삭제 요청
+message DeleteSRTopologyRequest {
+  string tnc_id = 1; // 🔹 UTNC가 발급한 ID
+  repeated string node_ids = 2; // 삭제할 노드 ID 리스트
+  repeated string link_ids = 3; // 삭제할 링크 ID 리스트
+}
+
+// ✅ SR 토폴로지 상태 조회 요청
+message GetSRTopologyStatusRequest {
+  string tnc_id = 1; // 🔹 UTNC가 부여한 ID (최초 InitialSRTopology 응답에서 받은 값)
+}
+
+// ✅ SR 토폴로지 상태 응답
+message SRTopologyStatusResponse {
+  bool success = 1;
+  repeated SRNode nodes = 2;
+  repeated SRLink links = 3;
+  int64 timestamp = 4; // 최근 업데이트 시간
+}
+
+// ✅ 장애 발생 보고 요청 (TNC → UTNC)
+message SRFailureReport {
+  string tnc_id = 1; // 🔹 UTNC가 발급한 ID
+  string failure_type = 2; // 장애 유형 (예: "NODE_DOWN", "LINK_DOWN")
+  repeated string affected_nodes = 3; // 장애가 발생한 노드 ID 리스트
+  repeated string affected_links = 4; // 장애가 발생한 링크 ID 리스트
+  int64 timestamp = 5; // 장애 발생 시간
+}
+
+// ✅ UTNC의 응답 메시지 (모든 요청 공통)
+message TopologyAck {
+  bool success = 1; // 정상 처리 여부 (true: 성공, false: 실패)
+  int32 error_code = 2; // 오류 코드 (0: 정상, 1: 데이터 오류, 2: gNB/UPF 누락 등)
+  string message = 3; // 오류 메시지 또는 상태 설명
+  string tnc_id = 4; // UTNC가 발급한 ID (최초 InitialSRTopology 요청 시 반환)
+  int64 timestamp = 5; // 응답 시간 (Unix timestamp)
+}
+
+// ✅ SR 노드 정의
+message SRNode {
+  string node_id = 1;
+  string name = 2;
+  string sid = 3;
+  string ip_address = 4;
+  repeated string connected_nodes = 5;
+  bool end_node = 6; // ✅ 엔드 노드 여부 추가
+}
+
+// ✅ SR 링크 정의
+message SRLink {
+  string link_id = 1;        // 🔹 자동 생성된 링크 ID (예: "sr3-sr4")
+  string source = 2;
+  string destination = 3;
+  repeated Metric metrics = 4; // 🔹 네트워크 매트릭 리스트
+  int64 timestamp = 5;        // 🔹 링크 정보의 최신 업데이트 시간 (Unix timestamp)
+}
+
+// ✅ 네트워크 메트릭 정의
+message Metric {
+  MetricType type = 1;
+  float value = 2;  // 🔹 매트릭 값
+  string unit = 3;  // 🔹 단위 (예: "ms", "%", "Mbps")
+}
+
+// ✅ Metric Type Enum
+enum MetricType {
+  METRIC_UNKNOWN = 0;      // 기본값: 정의되지 않음
+  METRIC_DELAY = 1;        // 패킷 지연 시간 (ms)
+  METRIC_BANDWIDTH = 2;    // 링크 대역폭 (Mbps)
+  METRIC_JITTER = 3;       // 지터 (ms)
+  METRIC_PACKET_LOSS = 4;  // 패킷 손실률 (%)
+  METRIC_COST = 5;         // 정책 기반 비용
+}
