@@ -63,6 +63,7 @@ message SRFailureReport {
   repeated string affected_nodes = 3; // 장애가 발생한 노드 ID 리스트
   repeated string affected_links = 4; // 장애가 발생한 링크 ID 리스트
   int64 timestamp = 5; // 장애 발생 시간
+  string description = 6; // 장애 상세 설명
 }
 
 // ✅ UTNC의 응답 메시지 (모든 요청 공통)

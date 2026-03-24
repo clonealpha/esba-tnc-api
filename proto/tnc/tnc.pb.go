@@ -385,6 +385,7 @@ type SRFailureReport struct {
 	AffectedNodes []string               `protobuf:"bytes,3,rep,name=affected_nodes,json=affectedNodes,proto3" json:"affected_nodes,omitempty"` // 장애가 발생한 노드 ID 리스트
 	AffectedLinks []string               `protobuf:"bytes,4,rep,name=affected_links,json=affectedLinks,proto3" json:"affected_links,omitempty"` // 장애가 발생한 링크 ID 리스트
 	Timestamp     int64                  `protobuf:"varint,5,opt,name=timestamp,proto3" json:"timestamp,omitempty"`                             // 장애 발생 시간
+	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`                          // 장애 상세 설명
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -452,6 +453,13 @@ func (x *SRFailureReport) GetTimestamp() int64 {
 		return x.Timestamp
 	}
 	return 0
+}
+
+func (x *SRFailureReport) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
 }
 
 // ✅ UTNC의 응답 메시지 (모든 요청 공통)
@@ -777,13 +785,14 @@ const file_proto_tnc_tnc_proto_rawDesc = "" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12!\n" +
 	"\x05nodes\x18\x02 \x03(\v2\v.tnc.SRNodeR\x05nodes\x12!\n" +
 	"\x05links\x18\x03 \x03(\v2\v.tnc.SRLinkR\x05links\x12\x1c\n" +
-	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\"\xb7\x01\n" +
+	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\"\xd9\x01\n" +
 	"\x0fSRFailureReport\x12\x15\n" +
 	"\x06tnc_id\x18\x01 \x01(\tR\x05tncId\x12!\n" +
 	"\ffailure_type\x18\x02 \x01(\tR\vfailureType\x12%\n" +
 	"\x0eaffected_nodes\x18\x03 \x03(\tR\raffectedNodes\x12%\n" +
 	"\x0eaffected_links\x18\x04 \x03(\tR\raffectedLinks\x12\x1c\n" +
-	"\ttimestamp\x18\x05 \x01(\x03R\ttimestamp\"\x95\x01\n" +
+	"\ttimestamp\x18\x05 \x01(\x03R\ttimestamp\x12 \n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\"\x95\x01\n" +
 	"\vTopologyAck\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1d\n" +
 	"\n" +

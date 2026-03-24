@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Protocol Buffers 컴파일 스크립트
-# Usage: 어디서든 실행 가능 (./scripts/compile-proto)
+# Usage: 어디서든 실행 가능 (./scripts/compile-proto [vpp|tnc|all])
 #   항상 프로젝트 루트의 proto/ 디렉토리에 생성됩니다.
 
 set -e
@@ -13,14 +13,49 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # 출력 경로는 항상 프로젝트 루트의 proto 디렉토리
-OUTPUT_PATH="$PROJECT_ROOT"
-PROTO_DIR="$OUTPUT_PATH/proto"
-PROTO_FILE="$PROJECT_ROOT/proto/agent.proto"
+PROTO_DIR="$PROJECT_ROOT/proto"
+TARGET="all"
+
+usage() {
+    echo "Usage: $0 [vpp|tnc|all]"
+    echo ""
+    echo "Targets:"
+    echo "  vpp            Compile only proto/vpp/agent.proto"
+    echo "  tnc            Compile only proto/tnc/tnc.proto"
+    echo "  all            Compile both (default)"
+    echo "  -h, --help     Show this help message"
+}
+
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    usage
+    exit 0
+fi
+
+if [ -n "$1" ]; then
+    TARGET="$1"
+fi
+
+if [ -n "$2" ]; then
+    echo "Error: Too many arguments"
+    usage
+    exit 1
+fi
+
+case "$TARGET" in
+    vpp|tnc|all) ;;
+    *)
+        echo "Error: Invalid target '$TARGET' (expected: vpp|tnc|all)"
+        usage
+        exit 1
+        ;;
+esac
+
+GO_BIN_DIR="$(go env GOPATH)/bin"
 
 echo "Script location: $SCRIPT_DIR"
 echo "Project root: $PROJECT_ROOT"
 echo "Output directory: $PROTO_DIR"
-echo "Proto file: $PROTO_FILE"
+echo "Target: $TARGET"
 
 # protoc가 설치되어 있는지 확인
 if ! command -v protoc &> /dev/null; then
@@ -79,11 +114,33 @@ fi
 echo "Using protoc-gen-go: $(which protoc-gen-go)"
 echo "Using protoc-gen-go-grpc: $(which protoc-gen-go-grpc)"
 
+PROTO_FILES=()
+GENERATED_GLOBS=()
+case "$TARGET" in
+    vpp)
+        PROTO_FILES=("proto/vpp/agent.proto")
+        GENERATED_GLOBS=("$PROJECT_ROOT/proto/vpp/agent"*.pb.go)
+        ;;
+    tnc)
+        PROTO_FILES=("proto/tnc/tnc.proto")
+        GENERATED_GLOBS=("$PROJECT_ROOT/proto/tnc/tnc"*.pb.go)
+        ;;
+    all)
+        PROTO_FILES=("proto/vpp/agent.proto" "proto/tnc/tnc.proto")
+        GENERATED_GLOBS=(
+            "$PROJECT_ROOT/proto/vpp/agent"*.pb.go
+            "$PROJECT_ROOT/proto/tnc/tnc"*.pb.go
+        )
+        ;;
+esac
+
 # proto 파일 존재 확인
-if [ ! -f "$PROTO_FILE" ]; then
-    echo "Error: proto file not found at $PROTO_FILE"
-    exit 1
-fi
+for proto_file in "${PROTO_FILES[@]}"; do
+    if [ ! -f "$PROJECT_ROOT/$proto_file" ]; then
+        echo "Error: proto file not found at $PROJECT_ROOT/$proto_file"
+        exit 1
+    fi
+done
 
 # proto 파일 컴파일
 echo "Compiling proto files..."
@@ -92,16 +149,14 @@ mkdir -p "$PROTO_DIR"
 # 프로젝트 루트로 이동하여 컴파일 (상대 경로 문제 방지)
 cd "$PROJECT_ROOT"
 
-protoc --go_out=. --go_opt=paths=source_relative \
-    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-    proto/agent.proto
+for proto_file in "${PROTO_FILES[@]}"; do
+    echo "Compiling: $proto_file"
+    protoc --go_out=. --go_opt=paths=source_relative \
+        --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+        "$proto_file"
+done
 
-if [ $? -eq 0 ]; then
-    echo "✓ Proto files compiled successfully!"
-    echo "Generated files in: $PROTO_DIR"
-    ls -la "$PROTO_DIR"/*.pb.go 2>/dev/null || echo "  (No .pb.go files found)"
-else
-    echo "✗ Failed to compile proto files"
-    exit 1
-fi
+echo "✓ Proto files compiled successfully!"
+echo "Generated files:"
+ls -la "${GENERATED_GLOBS[@]}" 2>/dev/null || echo "  (No .pb.go files found)"
 

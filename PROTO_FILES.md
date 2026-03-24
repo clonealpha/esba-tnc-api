@@ -19,20 +19,36 @@
 proto 파일을 수정한 후:
 
 ```bash
-# 1. proto 파일 수정
-vim proto/agent.proto
+# 1. proto 파일 수정 (예: VPP 또는 TNC)
+vim proto/vpp/agent.proto
+# 또는
+vim proto/tnc/tnc.proto
 
 # 2. 생성된 파일 재생성
-./scripts/generate-proto.sh
+./scripts/compile-proto vpp
+# 또는
+./scripts/compile-proto tnc
+# 둘 다
+./scripts/compile-proto all
 
 # 3. 생성된 파일도 함께 커밋
-git add proto/agent.proto proto/*.pb.go
+git add proto/**/*.proto proto/**/*.pb.go
 git commit -m "Update proto definition"
 git push origin main
 
 # 4. 새 버전 태그 생성
-git tag v0.1.3
+git tag -a v0.1.3 -m "release: v0.1.3 api update"
 git push origin v0.1.3
+```
+
+## 다른 프로젝트에서 새 버전 가져오기
+
+`esba-tnc-api`에 태그를 push한 뒤, 사용하는 프로젝트에서 버전을 올립니다:
+
+```bash
+# esba-tnc-agent 또는 esba-tnc-proxy 루트에서 실행
+go get github.com/clonealpha/esba-tnc-api@v0.1.3
+go mod tidy
 ```
 
 ## 대안: 생성된 파일 제외하기

@@ -7,6 +7,7 @@
 - [목적](#목적)
 - [구조](#구조)
 - [사용 방법](#사용-방법)
+- [배포 및 버전 태그](#배포-및-버전-태그)
 - [API 정의](#api-정의)
 - [업데이트 프로세스](#업데이트-프로세스)
 - [새로운 리소스 추가 절차](#새로운-리소스-추가-절차)
@@ -29,9 +30,14 @@ esba-tnc-api/
 │   ├── binapigen/         # binapi generator
 │   └── ...
 ├── proto/
-│   ├── agent.proto        # gRPC 서비스 정의
-│   ├── agent.pb.go        # 생성된 메시지 코드
-│   └── agent_grpc.pb.go   # 생성된 서비스 코드
+│   ├── vpp/
+│   │   ├── agent.proto        # VPP gRPC 서비스 정의
+│   │   ├── agent.pb.go        # 생성된 메시지 코드
+│   │   └── agent_grpc.pb.go   # 생성된 서비스 코드
+│   └── tnc/
+│       ├── tnc.proto          # TNC gRPC 서비스 정의
+│       ├── tnc.pb.go          # 생성된 메시지 코드
+│       └── tnc_grpc.pb.go     # 생성된 서비스 코드
 ├── tools/
 │   └── proto-generator/   # binapi → proto 변환 도구
 │       ├── config/
@@ -39,7 +45,8 @@ esba-tnc-api/
 │       └── ...
 ├── scripts/
 │   ├── generate-binapi.sh # binapi 생성 스크립트
-│   └── generate-proto.sh  # proto 파일 컴파일 스크립트
+│   ├── genenate-proto     # binapi -> proto 생성 스크립트
+│   └── compile-proto      # proto 파일 컴파일 스크립트 (vpp/tnc/all)
 ├── go.mod
 ├── go.sum
 └── README.md
@@ -51,15 +58,34 @@ esba-tnc-api/
 
 ```bash
 cd esba-tnc-api
-./scripts/generate-proto.sh
+./scripts/compile-proto all
+```
+
+타겟별로 컴파일:
+
+```bash
+# vpp만
+./scripts/compile-proto vpp
+
+# tnc만
+./scripts/compile-proto tnc
+
+# 둘 다 (기본값)
+./scripts/compile-proto all
 ```
 
 또는 수동으로:
 
 ```bash
+# vpp
 protoc --go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-    proto/agent.proto
+    proto/vpp/agent.proto
+
+# tnc
+protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    proto/tnc/tnc.proto
 ```
 
 ### 2. 다른 프로젝트에서 사용
@@ -93,6 +119,40 @@ proto.RegisterTncAgentServer(grpcServer, &server{})
 // 클라이언트에서
 client := pb.NewTncAgentClient(conn)
 ```
+
+## 배포 및 버전 태그
+
+API(`proto/*.proto`, `*.pb.go`)가 변경되면 반드시 새 버전 태그를 발행해야 합니다.
+다른 프로젝트(`esba-tnc-agent`, `esba-tnc-proxy`)는 이 태그 버전을 기준으로 변경사항을 가져옵니다.
+
+```bash
+# 1. proto 변경 및 재생성
+./scripts/compile-proto all
+
+# 2. 변경사항 커밋
+git add proto/**/*.proto proto/**/*.pb.go README.md
+git commit -m "feat: update tnc/vpp api definitions"
+
+# 3. 기본 브랜치에 push
+git push origin main
+
+# 4. 새 버전 태그 생성/푸시 (예: v0.1.6)
+git tag -a v0.1.6 -m "release: v0.1.6 api update"
+git push origin v0.1.6
+```
+
+다른 프로젝트에서는 새 태그로 의존성을 올립니다:
+
+```bash
+# 예시 (프로젝트 루트에서)
+go get github.com/clonealpha/esba-tnc-api@v0.1.6
+go mod tidy
+```
+
+권장 규칙:
+- 하위 호환 불가 변경: MAJOR/MINOR 증가
+- 하위 호환 가능 기능 추가: MINOR 증가
+- 버그/문서/생성 코드 정리: PATCH 증가
 
 ## API 정의
 
@@ -129,7 +189,7 @@ client := pb.NewTncAgentClient(conn)
 
 ### 메시지 타입
 
-주요 메시지 타입은 `proto/agent.proto`에 정의되어 있습니다:
+주요 메시지 타입은 `proto/vpp/agent.proto`에 정의되어 있습니다:
 
 - `HealthCheckRequest` / `HealthCheckResponse`: 헬스 체크
 - `CollectRequest`: 리소스 수집 요청
@@ -172,7 +232,7 @@ go run . --proto
 
 # 3. proto 컴파일
 cd ../..
-./scripts/generate-proto.sh
+./scripts/compile-proto vpp
 
 # 4. 변환 함수 생성
 cd tools/proto-generator
@@ -183,10 +243,10 @@ go run . --converters
 
 ```bash
 # 1. proto 파일 수정
-vim proto/agent.proto
+vim proto/vpp/agent.proto
 
 # 2. 코드 재생성
-./scripts/generate-proto.sh
+./scripts/compile-proto vpp
 
 # 3. 변경사항 확인
 git diff proto/
@@ -280,7 +340,7 @@ go run . --binapi-dir=../govpp/binapi --output=../proto --config=config/proto.ya
 
 #### 방법 B: 수동 추가
 
-`proto/agent.proto`에 직접 추가:
+`proto/vpp/agent.proto`에 직접 추가:
 
 ```protobuf
 // RPC 메서드 추가
@@ -301,7 +361,7 @@ message NewResourceEntry {
 ### 3. Proto 파일 컴파일
 
 ```bash
-./scripts/generate-proto.sh
+./scripts/compile-proto vpp
 ```
 
 또는 수동으로:
@@ -309,12 +369,12 @@ message NewResourceEntry {
 ```bash
 protoc --go_out=. --go_opt=paths=source_relative \
     --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-    proto/agent.proto
+    proto/vpp/agent.proto
 ```
 
 이 명령은 다음 파일들을 생성합니다:
-- `proto/agent.pb.go`: 메시지 타입 코드
-- `proto/agent_grpc.pb.go`: 서비스 코드
+- `proto/vpp/agent.pb.go`: 메시지 타입 코드
+- `proto/vpp/agent_grpc.pb.go`: 서비스 코드
 
 ### 4. 버전 업데이트 및 태그 생성
 
@@ -361,8 +421,8 @@ go run . --binapi-dir=../govpp/binapi --output=../esba-tnc-agent/agent/grpc/hand
 새 리소스 추가 시 다음 항목을 확인하세요:
 
 - [ ] `tools/proto-generator/config/proto.yaml`에 리소스 설정 추가
-- [ ] `proto/agent.proto`에 RPC 메서드 및 메시지 타입 추가 (수동 또는 자동)
-- [ ] Proto 파일 컴파일 완료 (`agent.pb.go`, `agent_grpc.pb.go` 생성 확인)
+- [ ] `proto/vpp/agent.proto`에 RPC 메서드 및 메시지 타입 추가 (수동 또는 자동)
+- [ ] Proto 파일 컴파일 완료 (`proto/vpp/agent.pb.go`, `proto/vpp/agent_grpc.pb.go` 생성 확인)
 - [ ] 빌드 테스트 (`go build ./...`)
 - [ ] 버전 태그 생성 및 GitHub push
 - [ ] `esba-tnc-agent`에서 새 버전 사용하도록 업데이트
